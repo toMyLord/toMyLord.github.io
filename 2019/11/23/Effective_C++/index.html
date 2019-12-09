@@ -16,7 +16,7 @@
 <meta property="og:site_name" content="toMyLord的博客">
 <meta property="og:description" content="有人说C++程序员可以分为两类，读过《Effective C++》的和没读过的。无论此书是否对得起这样的称呼，毫无疑问的是当我阅读完世界C++大师Scott Meyers成名之作之后，收获之丰，难以言表。无论是从objected-oriented方面、template方面还是内存管理方面，对我的整个C++观的塑造和改变都是无与伦比的。在国际上，本书所引起的反响，波及整个计算机技术的出版领域，余音">
 <meta property="og:locale" content="default">
-<meta property="og:updated_time" content="2019-12-08T14:11:30.310Z">
+<meta property="og:updated_time" content="2019-12-09T10:21:40.712Z">
 <meta name="twitter:card" content="summary">
   
     <link rel="alternative" href="/atom.xml" title="toMyLord的博客" type="application/atom+xml">
@@ -281,7 +281,14 @@
 <p>将析构函数声明为纯虚函数可以一举两得：使当前类成为抽象类且不需要在提供额外的纯虚函数！但谨记，仍要为析构函数实现一份定义，否则派生类在调用基类析构函数时会因为基类没有定义析构函数而报错！</p>
 <h3 id="8、别让异常逃离析构函数"><a href="#8、别让异常逃离析构函数" class="headerlink" title="8、别让异常逃离析构函数"></a>8、别让异常逃离析构函数</h3><p>如果析构函数能够抛出异常，那么C++编译器在<code>delet []</code>一组数据，调用一组析构函数时，就有可能同时抛出一个或一个以上的异常。但是对C++而言，在两个异常同时存在的情况下，程序若不是结束执行就是导致不明确行为。当然，容器或array并非遇上麻烦的必要条件，只要析构函数突出异常，即使并非使用容器或array，程序也可能过早结束或出现不明确行为。</p>
 <p>因此，将类似数据库的<code>close</code>的行为专门移交给一个成员函数并交给用户调用，让析构函数尽可能少做可能抛出异常的事情。给用户给自己调用close函数并不会增加负担，反而还提供了处理异常的机会。析构函数close只是双保险，但异常发生时必须退出程序或吞下异常。</p>
-<h3 id="9、绝不在构造和析构过程中调用virtual函数"><a href="#9、绝不在构造和析构过程中调用virtual函数" class="headerlink" title="9、绝不在构造和析构过程中调用virtual函数"></a>9、绝不在构造和析构过程中调用virtual函数</h3>
+<h3 id="9、绝不在构造和析构过程中调用virtual函数"><a href="#9、绝不在构造和析构过程中调用virtual函数" class="headerlink" title="9、绝不在构造和析构过程中调用virtual函数"></a>9、绝不在构造和析构过程中调用virtual函数</h3><p><strong>你不该在构造函数和析构函数期间调用<code>virtual</code>函数，因为这样的调用不会带来你预想的结果，就算有你也不会高兴！</strong></p>
+<p>由于base class构造函数的执行更早于derived class构造函数，当base class构造函数执行时derived class的成员变量尚未初始化。如果再次期间调<code>virtual</code>函数下降至derived class阶层，要知道derived class的函数计划必然取用local成员变量，而那些成员变量尚未初始化。这将是一张通往不明确行为和彻夜调试大会的直通车票。</p>
+<p>其实还有比上述理由更根本的原因：在derived class对象的base class构造期间，对象的类型是base class而不是derived class。不只<code>virtual</code>函数会被编译器解析至base class，若使用运行期类型信息，也会把对象视为base class类型。</p>
+<p>相同的道理也适用于析构函数。一旦derived class析构函数开始执行，对象内的derived class成员变量便呈现未定义值，所以C++视它们仿佛不再存在。进入base class析构函数后对象就成为一个base class 对象，而C++的任何部分包括<code>virual</code>函数、<code>dynamic_cast</code>s等等也就那么看待它。</p>
+<p><strong>在构造和西沟期间不要调用vitual函数，因为这类调用从不下降至derived class！</strong></p>
+<h3 id="10、令operator-返回一个reference-to-this"><a href="#10、令operator-返回一个reference-to-this" class="headerlink" title="10、令operator =返回一个reference to *this"></a>10、令operator =返回一个reference to *this</h3><hr>
+<p><strong>持续更新中……</strong></p>
+
       
 
       
