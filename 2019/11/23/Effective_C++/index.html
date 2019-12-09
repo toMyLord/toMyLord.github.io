@@ -16,7 +16,7 @@
 <meta property="og:site_name" content="toMyLord的博客">
 <meta property="og:description" content="有人说C++程序员可以分为两类，读过《Effective C++》的和没读过的。无论此书是否对得起这样的称呼，毫无疑问的是当我阅读完世界C++大师Scott Meyers成名之作之后，收获之丰，难以言表。无论是从objected-oriented方面、template方面还是内存管理方面，对我的整个C++观的塑造和改变都是无与伦比的。在国际上，本书所引起的反响，波及整个计算机技术的出版领域，余音">
 <meta property="og:locale" content="default">
-<meta property="og:updated_time" content="2019-12-09T10:21:40.712Z">
+<meta property="og:updated_time" content="2019-12-09T10:45:17.080Z">
 <meta name="twitter:card" content="summary">
   
     <link rel="alternative" href="/atom.xml" title="toMyLord的博客" type="application/atom+xml">
@@ -285,8 +285,13 @@
 <p>由于base class构造函数的执行更早于derived class构造函数，当base class构造函数执行时derived class的成员变量尚未初始化。如果再次期间调<code>virtual</code>函数下降至derived class阶层，要知道derived class的函数计划必然取用local成员变量，而那些成员变量尚未初始化。这将是一张通往不明确行为和彻夜调试大会的直通车票。</p>
 <p>其实还有比上述理由更根本的原因：在derived class对象的base class构造期间，对象的类型是base class而不是derived class。不只<code>virtual</code>函数会被编译器解析至base class，若使用运行期类型信息，也会把对象视为base class类型。</p>
 <p>相同的道理也适用于析构函数。一旦derived class析构函数开始执行，对象内的derived class成员变量便呈现未定义值，所以C++视它们仿佛不再存在。进入base class析构函数后对象就成为一个base class 对象，而C++的任何部分包括<code>virual</code>函数、<code>dynamic_cast</code>s等等也就那么看待它。</p>
-<p><strong>在构造和西沟期间不要调用vitual函数，因为这类调用从不下降至derived class！</strong></p>
-<h3 id="10、令operator-返回一个reference-to-this"><a href="#10、令operator-返回一个reference-to-this" class="headerlink" title="10、令operator =返回一个reference to *this"></a>10、令operator =返回一个reference to *this</h3><hr>
+<p><strong>在构造和析构期间不要调用vitual函数，因为这类调用从不下降至derived class！</strong></p>
+<h3 id="10、令operator-返回一个reference-to-this"><a href="#10、令operator-返回一个reference-to-this" class="headerlink" title="10、令operator =返回一个reference to *this"></a>10、令operator =返回一个reference to *this</h3><p>关于复制，有趣的是你可以把它们携程连锁形式<code>x = y = z = 15;</code>，赋值采用右结合律，所以上述连锁赋值被解析为<code>x = (y = (z = 15));</code>。</p>
+<p>为了实现“连锁赋值”，赋值操作符必须返回一个reference指向操作符的左侧实参。这是classes实现赋值操作符时一个遵循的协议：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Widget</span> &#123;</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span>:</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">    Widget &amp; <span class="keyword">operator</span> = (<span class="keyword">const</span> Widget &amp;rhs) &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">        ......</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line">        <span class="keyword">return</span> * <span class="keyword">this</span>;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">7</span></pre></td><td class="code"><pre><span class="line">&#125;;</span></pre></td></tr></table></figure>
+
+<p>这个协议不仅适用于以上标准赋值形式，也适用于所有赋值相关运算符。</p>
+<h3 id="11、在operator-中处理“自我赋值”"><a href="#11、在operator-中处理“自我赋值”" class="headerlink" title="11、在operator=中处理“自我赋值”"></a>11、在operator=中处理“自我赋值”</h3><hr>
 <p><strong>持续更新中……</strong></p>
 
       
